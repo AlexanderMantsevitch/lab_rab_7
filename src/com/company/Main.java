@@ -4,7 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class Main extends JFrame {
 
@@ -27,6 +34,7 @@ public class Main extends JFrame {
     private static final int MEDIUM_GAP = 10;
     private static final int LARGE_GAP = 15;
 
+    private static final int SERVER_PORT = 4567;
 
     public Main() {
         super ("Лабараторная работа №7");
@@ -46,9 +54,9 @@ public class Main extends JFrame {
                 new JScrollPane(textAreaIncoming);
 
         textAreaOutgoing = new JTextArea(OUTGOING_AREA_DEFAULT_ROWS, 0);
-        textAreaIncoming.setEditable(false);
+
         final JScrollPane scrollPaneOutgoing =
-                new JScrollPane(textAreaIncoming);
+                new JScrollPane(textAreaOutgoing);
 
         final JLabel labelFrom = new JLabel("Подпись");
         final JLabel labelTo = new JLabel("Получатель");
@@ -65,7 +73,7 @@ public class Main extends JFrame {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ;
+                sendMessage();
             }
         });
 
@@ -116,10 +124,98 @@ public class Main extends JFrame {
                 .addComponent(messagePanel)
                 .addContainerGap());
 
+
+        new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                final ServerSocket serverSocket =
+                        new ServerSocket(SERVER_PORT);
+                while (!Thread.interrupted()) {
+                    final Socket socket = serverSocket.accept();
+                    final DataInputStream in = new DataInputStream(
+                            socket.getInputStream());
+// Читаем имя отправителя
+                    final String senderName = in.readUTF();
+// Читаем сообщение
+                    final String message = in.readUTF();
+// Закрываем соединение
+                    socket.close();
+// Выделяем IP-адрес
+                    final String address =
+                            ((InetSocketAddress) socket
+                                    .getRemoteSocketAddress())
+                                    .getAddress()
+                                    .getHostAddress();
+// Выводим сообщение в текстовую область
+                    textAreaIncoming.append(senderName +
+                            " (" + address + "): " +
+                            message + "\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(Main.this,
+                        "Ошибка в работе сервера", "Ошибка",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }).start();
+}
+    private void sendMessage() {
+        try {
+// Получаем необходимые параметры
+            final String senderName = textFieldFrom.getText();
+            final String destinationAddress = textFieldTo.getText();
+            final String message = textAreaOutgoing.getText();
+// Убеждаемся, что поля не пустые
+            if (senderName.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Введите имя отправителя", "Ошибка",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (destinationAddress.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Введите адрес узла-получателя", "Ошибка",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (message.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Введите текст сообщения", "Ошибка",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+// Создаем сокет для соединения
+            final Socket socket =
+                    new Socket(destinationAddress, SERVER_PORT);
+// Открываем поток вывода данных
+            final DataOutputStream out =
+                    new DataOutputStream(socket.getOutputStream());
+// Записываем в поток имя
+            out.writeUTF(senderName);
+// Записываем в поток сообщение
+            out.writeUTF(message);
+// Закрываем сокет
+            socket.close();
+// Помещаем сообщения в текстовую область вывода
+            textAreaIncoming.append("Я -> " + destinationAddress + ": "
+                    + message + "\n");
+// Очищаем текстовую область ввода сообщения
+            textAreaOutgoing.setText("");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(Main.this,
+                    "Не удалось отправить сообщение: узел-адресат не найден",
+
+                    "Ошибка", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(Main.this,
+                    "Не удалось отправить сообщение", "Ошибка",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
-
-
-
     public static void main(String[] args) {
        Main frame = new Main();
        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
