@@ -1,6 +1,7 @@
 package com.company;
 
 import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,18 +24,21 @@ public class Main extends JFrame {
     private static final int INCOMING_AREA_DEFAULT_ROWS = 10;
     private static final int OUTGOING_AREA_DEFAULT_ROWS = 5;
 
-    private final JTextArea textAreaIncoming;
-    private final JTextArea textAreaOutgoing;
+    private final JTextPane textAreaIncoming;
+    private  JTextPane textAreaOutgoing;
 
     private final JTextField textFieldFrom;
     private final JTextField textFieldTo;
     private JPanel field = new JPanel();
+    private JScrollPane scrollPaneOutgoing;
 
     private static final int SMALL_GAP = 5;
     private static final int MEDIUM_GAP = 10;
     private static final int LARGE_GAP = 15;
 
     private static final int SERVER_PORT = 4567;
+
+
 
     public Main() {
         super ("Лабараторная работа №7");
@@ -48,20 +52,21 @@ public class Main extends JFrame {
                 (kit.getScreenSize().height - HEIGHT)/2);
 
 
-        textAreaIncoming = new JTextArea(INCOMING_AREA_DEFAULT_ROWS, 0);
+        textAreaIncoming = new JTextPane();
         textAreaIncoming.setEditable(false);
         final JScrollPane scrollPaneIncoming =
                 new JScrollPane(textAreaIncoming);
 
-        textAreaOutgoing = new JTextArea(OUTGOING_AREA_DEFAULT_ROWS, 0);
+        textAreaOutgoing = new JTextPane();
 
-        final JScrollPane scrollPaneOutgoing =
+       scrollPaneOutgoing =
                 new JScrollPane(textAreaOutgoing);
 
         final JLabel labelFrom = new JLabel("Подпись");
         final JLabel labelTo = new JLabel("Получатель");
         textFieldFrom = new JTextField(FROM_FIELD_DEFAULT_COLUMNS);
         textFieldTo = new JTextField(TO_FIELD_DEFAULT_COLUMNS);
+
 
 
 
@@ -76,6 +81,92 @@ public class Main extends JFrame {
                 sendMessage();
             }
         });
+        final JButton kursive = new JButton("K");
+        kursive.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            if (textAreaOutgoing.getSelectionStart() != textAreaOutgoing.getSelectionEnd() )
+                {
+                try {
+                    JTextPane pane = new JTextPane();
+                    SimpleAttributeSet att = new SimpleAttributeSet();
+
+                    pane.setCharacterAttributes(att, true);
+                    pane.setText(textAreaOutgoing.getText(0, textAreaOutgoing.getSelectionStart()));
+                    att = new SimpleAttributeSet();
+
+                    StyleConstants.setItalic(att, true);
+                    pane.setCharacterAttributes(att, true);
+                    String a = textAreaOutgoing.getText();
+                    Document doc = pane.getStyledDocument();
+                    doc.insertString(doc.getLength(),
+                            textAreaOutgoing.getText(textAreaOutgoing.getSelectionStart(), textAreaOutgoing.getSelectionEnd()
+                            - textAreaOutgoing.getSelectionStart()), att);
+                    StyleConstants.setItalic(att, false);
+                    doc.insertString(doc.getLength(),
+                            textAreaOutgoing.getText(textAreaOutgoing.getSelectionEnd(),
+                                    a.length() - textAreaOutgoing.getSelectionEnd()), att);
+                    textAreaOutgoing.setDocument(doc);
+                    System.out.println(pane.getText());
+
+
+                }
+                catch (BadLocationException exc)
+                {
+
+
+                }
+                }
+
+            }
+        });
+
+
+        final JButton bold = new JButton("B");
+        bold.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Hi");
+                if (textAreaOutgoing.getSelectionStart() != textAreaOutgoing.getSelectionEnd() )
+                {
+                    try {
+                        JTextPane pane = new JTextPane(textAreaOutgoing.getStyledDocument());
+                        SimpleAttributeSet att = new SimpleAttributeSet();
+
+                        pane.setCharacterAttributes(att, true);
+                        pane.setText(textAreaOutgoing.getText(0, textAreaOutgoing.getSelectionStart()));
+                        att = new SimpleAttributeSet();
+
+                        StyleConstants.setBold(att, true);
+                        pane.setCharacterAttributes(att, true);
+                        String a = textAreaOutgoing.getText();
+                        Document doc = pane.getStyledDocument();
+                        doc.insertString(doc.getLength(),
+                                textAreaOutgoing.getText(textAreaOutgoing.getSelectionStart(), textAreaOutgoing.getSelectionEnd()
+                                        - textAreaOutgoing.getSelectionStart()), att);
+                        StyleConstants.setBold(att, false);
+                        doc.insertString(doc.getLength(),
+                                textAreaOutgoing.getText(textAreaOutgoing.getSelectionEnd(),
+                                        a.length() - textAreaOutgoing.getSelectionEnd()), att);
+                        textAreaOutgoing.setDocument(doc);
+
+
+
+                    }
+                    catch (BadLocationException exc)
+                    {
+
+
+                    }
+                }
+
+            }
+        });
+
+        JPanel buttons = new JPanel();
+        buttons.add (kursive);
+        buttons.add (bold);
+
 
 
         final GroupLayout layout2 = new GroupLayout(messagePanel);
@@ -91,8 +182,11 @@ public class Main extends JFrame {
                                 .addComponent(labelTo)
                                 .addGap(SMALL_GAP)
                                 .addComponent(textFieldTo))
+                                .addComponent(buttons)
                         .addComponent(scrollPaneOutgoing)
-                        .addComponent(sendButton))
+                        .addComponent(sendButton)
+                        )
+
                 .addContainerGap());
         layout2.setVerticalGroup(layout2.createSequentialGroup()
                 .addContainerGap()
@@ -101,10 +195,14 @@ public class Main extends JFrame {
                         .addComponent(textFieldFrom)
                         .addComponent(labelTo)
                         .addComponent(textFieldTo))
-                .addGap(MEDIUM_GAP)
+                        .addGap(MEDIUM_GAP)
+                .addComponent(buttons)
                 .addComponent(scrollPaneOutgoing)
+
                 .addGap(MEDIUM_GAP)
                 .addComponent(sendButton)
+
+
                 .addContainerGap());
 
 
@@ -123,7 +221,6 @@ public class Main extends JFrame {
                 .addGap(MEDIUM_GAP)
                 .addComponent(messagePanel)
                 .addContainerGap());
-
 
         new Thread(new Runnable() {
         @Override
@@ -148,7 +245,8 @@ public class Main extends JFrame {
                                     .getAddress()
                                     .getHostAddress();
 // Выводим сообщение в текстовую область
-                    textAreaIncoming.append(senderName +
+                    textAreaIncoming.setText(
+                            senderName +
                             " (" + address + "): " +
                             message + "\n");
                 }
@@ -161,6 +259,8 @@ public class Main extends JFrame {
         }
     }).start();
 }
+
+
     private void sendMessage() {
         try {
 // Получаем необходимые параметры
@@ -199,7 +299,7 @@ public class Main extends JFrame {
 // Закрываем сокет
             socket.close();
 // Помещаем сообщения в текстовую область вывода
-            textAreaIncoming.append("Я -> " + destinationAddress + ": "
+            textAreaIncoming.setText(textAreaIncoming.getText() + "\n"+ "Я -> " + destinationAddress + ": "
                     + message + "\n");
 // Очищаем текстовую область ввода сообщения
             textAreaOutgoing.setText("");
@@ -216,6 +316,7 @@ public class Main extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+
     public static void main(String[] args) {
        Main frame = new Main();
        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
