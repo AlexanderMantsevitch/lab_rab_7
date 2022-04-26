@@ -1,13 +1,16 @@
 package com.company;
 
+import org.w3c.dom.stylesheets.DocumentStyle;
+import org.w3c.dom.stylesheets.StyleSheetList;
+
 import javax.swing.*;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -24,7 +27,9 @@ public class Main extends JFrame {
     private static final int INCOMING_AREA_DEFAULT_ROWS = 10;
     private static final int OUTGOING_AREA_DEFAULT_ROWS = 5;
 
-    private final JTextPane textAreaIncoming;
+    private  JTextPane textAreaIncoming;
+    private  JTextArea textAreaincoming =  new JTextArea();
+
     private  JTextPane textAreaOutgoing;
 
     private final JTextField textFieldFrom;
@@ -54,6 +59,7 @@ public class Main extends JFrame {
 
         textAreaIncoming = new JTextPane();
         textAreaIncoming.setEditable(false);
+        textAreaIncoming.setText(" ");
         final JScrollPane scrollPaneIncoming =
                 new JScrollPane(textAreaIncoming);
 
@@ -78,6 +84,7 @@ public class Main extends JFrame {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 sendMessage();
             }
         });
@@ -88,26 +95,21 @@ public class Main extends JFrame {
             if (textAreaOutgoing.getSelectionStart() != textAreaOutgoing.getSelectionEnd() )
                 {
                 try {
-                    JTextPane pane = new JTextPane();
+                    JTextPane pane = new JTextPane(textAreaOutgoing.getStyledDocument());
+
                     SimpleAttributeSet att = new SimpleAttributeSet();
 
-                    pane.setCharacterAttributes(att, true);
-                    pane.setText(textAreaOutgoing.getText(0, textAreaOutgoing.getSelectionStart()));
-                    att = new SimpleAttributeSet();
 
                     StyleConstants.setItalic(att, true);
                     pane.setCharacterAttributes(att, true);
                     String a = textAreaOutgoing.getText();
-                    Document doc = pane.getStyledDocument();
-                    doc.insertString(doc.getLength(),
+
+                    pane.getStyledDocument().insertString(textAreaOutgoing.getSelectionStart(),
                             textAreaOutgoing.getText(textAreaOutgoing.getSelectionStart(), textAreaOutgoing.getSelectionEnd()
-                            - textAreaOutgoing.getSelectionStart()), att);
-                    StyleConstants.setItalic(att, false);
-                    doc.insertString(doc.getLength(),
-                            textAreaOutgoing.getText(textAreaOutgoing.getSelectionEnd(),
-                                    a.length() - textAreaOutgoing.getSelectionEnd()), att);
-                    textAreaOutgoing.setDocument(doc);
-                    System.out.println(pane.getText());
+                                    - textAreaOutgoing.getSelectionStart()), att);
+                    textAreaOutgoing.replaceSelection("");
+                    textAreaOutgoing.setDocument(pane.getStyledDocument());
+
 
 
                 }
@@ -126,29 +128,24 @@ public class Main extends JFrame {
         bold.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Hi");
+
                 if (textAreaOutgoing.getSelectionStart() != textAreaOutgoing.getSelectionEnd() )
                 {
                     try {
                         JTextPane pane = new JTextPane(textAreaOutgoing.getStyledDocument());
+
                         SimpleAttributeSet att = new SimpleAttributeSet();
 
-                        pane.setCharacterAttributes(att, true);
-                        pane.setText(textAreaOutgoing.getText(0, textAreaOutgoing.getSelectionStart()));
-                        att = new SimpleAttributeSet();
 
                         StyleConstants.setBold(att, true);
                         pane.setCharacterAttributes(att, true);
                         String a = textAreaOutgoing.getText();
-                        Document doc = pane.getStyledDocument();
-                        doc.insertString(doc.getLength(),
+
+                        pane.getStyledDocument().insertString(textAreaOutgoing.getSelectionStart(),
                                 textAreaOutgoing.getText(textAreaOutgoing.getSelectionStart(), textAreaOutgoing.getSelectionEnd()
                                         - textAreaOutgoing.getSelectionStart()), att);
-                        StyleConstants.setBold(att, false);
-                        doc.insertString(doc.getLength(),
-                                textAreaOutgoing.getText(textAreaOutgoing.getSelectionEnd(),
-                                        a.length() - textAreaOutgoing.getSelectionEnd()), att);
-                        textAreaOutgoing.setDocument(doc);
+                        textAreaOutgoing.replaceSelection("");
+                        textAreaOutgoing.setDocument(pane.getStyledDocument());
 
 
 
@@ -226,35 +223,156 @@ public class Main extends JFrame {
         @Override
         public void run() {
             try {
+                Document object = new Document() {
+                    @Override
+                    public int getLength() {
+                        return 0;
+                    }
+
+                    @Override
+                    public void addDocumentListener(DocumentListener listener) {
+
+                    }
+
+                    @Override
+                    public void removeDocumentListener(DocumentListener listener) {
+
+                    }
+
+                    @Override
+                    public void addUndoableEditListener(UndoableEditListener listener) {
+
+                    }
+
+                    @Override
+                    public void removeUndoableEditListener(UndoableEditListener listener) {
+
+                    }
+
+                    @Override
+                    public Object getProperty(Object key) {
+                        return null;
+                    }
+
+                    @Override
+                    public void putProperty(Object key, Object value) {
+
+                    }
+
+                    @Override
+                    public void remove(int offs, int len) throws BadLocationException {
+
+                    }
+
+                    @Override
+                    public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
+
+                    }
+
+                    @Override
+                    public String getText(int offset, int length) throws BadLocationException {
+                        return null;
+                    }
+
+                    @Override
+                    public void getText(int offset, int length, Segment txt) throws BadLocationException {
+
+                    }
+
+                    @Override
+                    public Position getStartPosition() {
+                        return null;
+                    }
+
+                    @Override
+                    public Position getEndPosition() {
+                        return null;
+                    }
+
+                    @Override
+                    public Position createPosition(int offs) throws BadLocationException {
+                        return null;
+                    }
+
+                    @Override
+                    public Element[] getRootElements() {
+                        return new Element[0];
+                    }
+
+                    @Override
+                    public Element getDefaultRootElement() {
+                        return null;
+                    }
+
+                    @Override
+                    public void render(Runnable r) {
+
+                    }
+                };
                 final ServerSocket serverSocket =
                         new ServerSocket(SERVER_PORT);
                 while (!Thread.interrupted()) {
+
                     final Socket socket = serverSocket.accept();
                     final DataInputStream in = new DataInputStream(
                             socket.getInputStream());
 // Читаем имя отправителя
-                    final String senderName = in.readUTF();
+                     String senderName = in.readUTF();
 // Читаем сообщение
-                    final String message = in.readUTF();
+                     String message = in.readUTF();
+                    try
+                    { final ObjectInputStream inn = new ObjectInputStream(socket.getInputStream());
+                      object = (StyledDocument) inn.readObject();}
+                    catch (ClassNotFoundException e) {
+
+
+                    };
 // Закрываем соединение
+
+
                     socket.close();
 // Выделяем IP-адрес
-                    final String address =
+                     String address =
                             ((InetSocketAddress) socket
                                     .getRemoteSocketAddress())
                                     .getAddress()
                                     .getHostAddress();
 // Выводим сообщение в текстовую область
-                    textAreaIncoming.setText(
-                            senderName +
+
+
+                    textAreaincoming.append(   senderName +
                             " (" + address + "): " +
                             message + "\n");
+                    JTextPane pane = new JTextPane();
+
+
+                   AttributeSet att =  pane.getCharacterAttributes();
+
+                    textAreaIncoming.getStyledDocument().insertString(textAreaIncoming.getDocument().getLength(),
+                            senderName +
+                                    " (" + address + "): " +
+                                    message + "\n"  , att );
+
+
                 }
+
+
+
             } catch (IOException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(Main.this,
                         "Ошибка в работе сервера", "Ошибка",
                         JOptionPane.ERROR_MESSAGE);
+
+            }
+            catch (BadLocationException e)
+            {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(Main.this,
+                        "Ошибка в работе сервера", "Ошибка",
+                        JOptionPane.ERROR_MESSAGE);
+
+
             }
         }
     }).start();
@@ -264,6 +382,7 @@ public class Main extends JFrame {
     private void sendMessage() {
         try {
 // Получаем необходимые параметры
+
             final String senderName = textFieldFrom.getText();
             final String destinationAddress = textFieldTo.getText();
             final String message = textAreaOutgoing.getText();
@@ -296,13 +415,29 @@ public class Main extends JFrame {
             out.writeUTF(senderName);
 // Записываем в поток сообщение
             out.writeUTF(message);
+
+            final ObjectOutputStream oout = new ObjectOutputStream(socket.getOutputStream());
+            oout.writeObject(textAreaOutgoing.getStyledDocument());
+
 // Закрываем сокет
             socket.close();
+
 // Помещаем сообщения в текстовую область вывода
-            textAreaIncoming.setText(textAreaIncoming.getText() + "\n"+ "Я -> " + destinationAddress + ": "
+            JTextPane pane = new JTextPane( textAreaOutgoing.getStyledDocument());
+            AttributeSet att = pane.getCharacterAttributes();
+
+            textAreaIncoming.getStyledDocument().insertString(textAreaIncoming.getStyledDocument().getLength(),
+                    "Я -> " + destinationAddress + ": "
+                            + message + "\n" , att );
+
+
+            textAreaincoming.append("Я -> " + destinationAddress + ": "
                     + message + "\n");
+
+
 // Очищаем текстовую область ввода сообщения
             textAreaOutgoing.setText("");
+
         } catch (UnknownHostException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(Main.this,
@@ -314,6 +449,14 @@ public class Main extends JFrame {
             JOptionPane.showMessageDialog(Main.this,
                     "Не удалось отправить сообщение", "Ошибка",
                     JOptionPane.ERROR_MESSAGE);
+        }
+        catch (BadLocationException e)
+        {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(Main.this,
+                    "Не удалось отправить сообщение", "Ошибка",
+                    JOptionPane.ERROR_MESSAGE);
+
         }
     }
 
