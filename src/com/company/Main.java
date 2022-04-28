@@ -11,11 +11,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 
 public class Main extends JFrame {
 
@@ -36,7 +39,9 @@ public class Main extends JFrame {
     private final JTextField textFieldTo;
     private JPanel field = new JPanel();
     private JScrollPane scrollPaneOutgoing;
-
+    private ArrayList <Integer> kursive_array = new ArrayList<>();
+    private ArrayList <Integer> bold_array = new ArrayList<>();
+    private ArrayList <Integer> under_array = new ArrayList<>();
     private static final int SMALL_GAP = 5;
     private static final int MEDIUM_GAP = 10;
     private static final int LARGE_GAP = 15;
@@ -86,6 +91,30 @@ public class Main extends JFrame {
             public void actionPerformed(ActionEvent e) {
 
                 sendMessage();
+               kursive_array = new ArrayList<Integer>();
+                bold_array = new ArrayList<Integer>();
+                under_array = new ArrayList<Integer>();
+
+               try {
+
+                   JTextPane aa = new JTextPane(textAreaOutgoing.getStyledDocument());
+                   SimpleAttributeSet att1 = new SimpleAttributeSet(); ;
+                   StyleConstants.setItalic(att1, false);
+                   StyleConstants.setBold(att1, false);
+
+
+                   aa.select(0, aa.getStyledDocument().getLength());
+                   aa.replaceSelection("");
+                   aa.getStyledDocument().insertString(0,
+                           " ", att1);
+                   textAreaOutgoing.setStyledDocument(aa.getStyledDocument());
+
+
+               }
+               catch (BadLocationException exc) {
+
+
+               }
             }
         });
         final JButton kursive = new JButton("K");
@@ -99,7 +128,8 @@ public class Main extends JFrame {
 
                     SimpleAttributeSet att = new SimpleAttributeSet();
 
-
+                    kursive_array.add(textAreaOutgoing.getSelectionStart());
+                    kursive_array.add(textAreaOutgoing.getSelectionEnd());
                     StyleConstants.setItalic(att, true);
                     pane.setCharacterAttributes(att, true);
                     String a = textAreaOutgoing.getText();
@@ -108,7 +138,7 @@ public class Main extends JFrame {
                             textAreaOutgoing.getText(textAreaOutgoing.getSelectionStart(), textAreaOutgoing.getSelectionEnd()
                                     - textAreaOutgoing.getSelectionStart()), att);
                     textAreaOutgoing.replaceSelection("");
-                    textAreaOutgoing.setDocument(pane.getStyledDocument());
+                    textAreaOutgoing.setStyledDocument(pane.getStyledDocument());
 
 
 
@@ -135,7 +165,8 @@ public class Main extends JFrame {
                         JTextPane pane = new JTextPane(textAreaOutgoing.getStyledDocument());
 
                         SimpleAttributeSet att = new SimpleAttributeSet();
-
+                        bold_array.add(textAreaOutgoing.getSelectionStart());
+                        bold_array.add(textAreaOutgoing.getSelectionEnd());
 
                         StyleConstants.setBold(att, true);
                         pane.setCharacterAttributes(att, true);
@@ -145,7 +176,43 @@ public class Main extends JFrame {
                                 textAreaOutgoing.getText(textAreaOutgoing.getSelectionStart(), textAreaOutgoing.getSelectionEnd()
                                         - textAreaOutgoing.getSelectionStart()), att);
                         textAreaOutgoing.replaceSelection("");
-                        textAreaOutgoing.setDocument(pane.getStyledDocument());
+                        textAreaOutgoing.setStyledDocument(pane.getStyledDocument());
+
+
+
+                    }
+                    catch (BadLocationException exc)
+                    {
+
+
+                    }
+                }
+
+            }
+        });
+
+        final JButton under = new JButton("П");
+        under.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (textAreaOutgoing.getSelectionStart() != textAreaOutgoing.getSelectionEnd() )
+                {
+                    try {
+                        JTextPane pane = new JTextPane(textAreaOutgoing.getStyledDocument());
+
+                        SimpleAttributeSet att = new SimpleAttributeSet();
+
+                        under_array.add(textAreaOutgoing.getSelectionStart());
+                        under_array.add(textAreaOutgoing.getSelectionEnd());
+                        StyleConstants.setUnderline(att, true);
+                        pane.setCharacterAttributes(att, true);
+                        String a = textAreaOutgoing.getText();
+
+                        pane.getStyledDocument().insertString(textAreaOutgoing.getSelectionStart(),
+                                textAreaOutgoing.getText(textAreaOutgoing.getSelectionStart(), textAreaOutgoing.getSelectionEnd()
+                                        - textAreaOutgoing.getSelectionStart()), att);
+                        textAreaOutgoing.replaceSelection("");
+                        textAreaOutgoing.setStyledDocument(pane.getStyledDocument());
 
 
 
@@ -163,6 +230,7 @@ public class Main extends JFrame {
         JPanel buttons = new JPanel();
         buttons.add (kursive);
         buttons.add (bold);
+        buttons.add(under);
 
 
 
@@ -223,92 +291,10 @@ public class Main extends JFrame {
         @Override
         public void run() {
             try {
-                Document object = new Document() {
-                    @Override
-                    public int getLength() {
-                        return 0;
-                    }
 
-                    @Override
-                    public void addDocumentListener(DocumentListener listener) {
-
-                    }
-
-                    @Override
-                    public void removeDocumentListener(DocumentListener listener) {
-
-                    }
-
-                    @Override
-                    public void addUndoableEditListener(UndoableEditListener listener) {
-
-                    }
-
-                    @Override
-                    public void removeUndoableEditListener(UndoableEditListener listener) {
-
-                    }
-
-                    @Override
-                    public Object getProperty(Object key) {
-                        return null;
-                    }
-
-                    @Override
-                    public void putProperty(Object key, Object value) {
-
-                    }
-
-                    @Override
-                    public void remove(int offs, int len) throws BadLocationException {
-
-                    }
-
-                    @Override
-                    public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
-
-                    }
-
-                    @Override
-                    public String getText(int offset, int length) throws BadLocationException {
-                        return null;
-                    }
-
-                    @Override
-                    public void getText(int offset, int length, Segment txt) throws BadLocationException {
-
-                    }
-
-                    @Override
-                    public Position getStartPosition() {
-                        return null;
-                    }
-
-                    @Override
-                    public Position getEndPosition() {
-                        return null;
-                    }
-
-                    @Override
-                    public Position createPosition(int offs) throws BadLocationException {
-                        return null;
-                    }
-
-                    @Override
-                    public Element[] getRootElements() {
-                        return new Element[0];
-                    }
-
-                    @Override
-                    public Element getDefaultRootElement() {
-                        return null;
-                    }
-
-                    @Override
-                    public void render(Runnable r) {
-
-                    }
-                };
+                ArrayList <Integer> kursive_arr = new ArrayList<Integer>();
+                ArrayList <Integer> bold_arr = new ArrayList<Integer>();
+                ArrayList <Integer> under_arr = new ArrayList<Integer>();
                 final ServerSocket serverSocket =
                         new ServerSocket(SERVER_PORT);
                 while (!Thread.interrupted()) {
@@ -320,11 +306,19 @@ public class Main extends JFrame {
                      String senderName = in.readUTF();
 // Читаем сообщение
                      String message = in.readUTF();
+
                     try
                     { final ObjectInputStream inn = new ObjectInputStream(socket.getInputStream());
-                      object = (StyledDocument) inn.readObject();}
-                    catch (ClassNotFoundException e) {
 
+                        kursive_arr = (ArrayList <Integer>)inn.readObject();
+                        bold_arr = (ArrayList <Integer>)inn.readObject();
+                        under_arr = (ArrayList <Integer>)inn.readObject();
+
+
+
+                    }
+                    catch (ClassNotFoundException e) {
+                        System.out.println("Error");
 
                     };
 // Закрываем соединение
@@ -339,20 +333,59 @@ public class Main extends JFrame {
                                     .getHostAddress();
 // Выводим сообщение в текстовую область
 
+                    Thread.sleep(25);
+                    SimpleAttributeSet att_default = new SimpleAttributeSet();
 
-                    textAreaincoming.append(   senderName +
-                            " (" + address + "): " +
-                            message + "\n");
-                    JTextPane pane = new JTextPane();
+                    textAreaIncoming.getStyledDocument().insertString(textAreaIncoming.getStyledDocument().getLength(),
+                              senderName +
+                                    " (" + address + "): " , att_default);
+
+                    Integer end = textAreaIncoming.getStyledDocument().getLength();
+
+                    textAreaIncoming.getStyledDocument().insertString(textAreaIncoming.getStyledDocument().getLength(),
+                             message + "\n" , att_default);
 
 
-                   AttributeSet att =  pane.getCharacterAttributes();
 
-                    textAreaIncoming.getStyledDocument().insertString(textAreaIncoming.getDocument().getLength(),
-                            senderName +
-                                    " (" + address + "): " +
-                                    message + "\n"  , att );
+                        SimpleAttributeSet att = new SimpleAttributeSet();
+                        StyleConstants.setItalic(att, true);
 
+                    textAreaIncoming.setEditable(true);
+                    for (int q = 0; q < kursive_arr.toArray().length - 1; q += 2) {
+                        textAreaIncoming.select(end + kursive_arr.get(q), end+kursive_arr.get(q+1) );
+                        textAreaIncoming.replaceSelection("");
+                        textAreaIncoming.getStyledDocument().insertString(end + kursive_arr.get(q),
+                                message.substring(kursive_arr.get(q), kursive_arr.get(q+1) ), att);
+
+
+
+                    }
+                     att = new SimpleAttributeSet();
+                    StyleConstants.setBold(att, true);
+
+                    for (int q = 0; q < bold_arr.toArray().length - 1; q += 2) {
+
+                        textAreaIncoming.select((int)(end + bold_arr.get(q)), (int)(end+bold_arr.get(q+1)) );
+                        textAreaIncoming.replaceSelection("");
+                        textAreaIncoming.getStyledDocument().insertString((int)(end + bold_arr.get(q)),
+                                message.substring(bold_arr.get(q), bold_arr.get(q+1) ), att);
+
+
+
+                    }
+                    att = new SimpleAttributeSet();
+                    StyleConstants.setUnderline(att, true);
+                    for (int y = 0; y < under_arr.toArray().length - 1; y += 2) {
+
+                        textAreaIncoming.select((int)(end + under_arr.get(y)), (int)(end+under_arr.get(y+1)) );
+                        textAreaIncoming.replaceSelection("");
+                        textAreaIncoming.getStyledDocument().insertString((int)(end + under_arr.get(y)),
+                                message.substring(under_arr.get(y), under_arr.get(y+1) ), att);
+
+
+
+                    }
+                    textAreaIncoming.setEditable(false);
 
                 }
 
@@ -374,6 +407,11 @@ public class Main extends JFrame {
 
 
             }
+            catch (InterruptedException e)
+            {
+
+
+            }
         }
     }).start();
 }
@@ -385,7 +423,7 @@ public class Main extends JFrame {
 
             final String senderName = textFieldFrom.getText();
             final String destinationAddress = textFieldTo.getText();
-            final String message = textAreaOutgoing.getText();
+             String message = textAreaOutgoing.getText();
 // Убеждаемся, что поля не пустые
             if (senderName.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
@@ -417,26 +455,79 @@ public class Main extends JFrame {
             out.writeUTF(message);
 
             final ObjectOutputStream oout = new ObjectOutputStream(socket.getOutputStream());
-            oout.writeObject(textAreaOutgoing.getStyledDocument());
+
+
+          oout.writeObject(kursive_array);
+          oout.writeObject(bold_array);
+          oout.writeObject(under_array);
 
 // Закрываем сокет
             socket.close();
 
 // Помещаем сообщения в текстовую область вывода
-            JTextPane pane = new JTextPane( textAreaOutgoing.getStyledDocument());
-            AttributeSet att = pane.getCharacterAttributes();
+
+            SimpleAttributeSet default0 = new SimpleAttributeSet();
 
             textAreaIncoming.getStyledDocument().insertString(textAreaIncoming.getStyledDocument().getLength(),
-                    "Я -> " + destinationAddress + ": "
-                            + message + "\n" , att );
+                    "\n"+"Я -> " + destinationAddress + ": " , default0);
+            Integer end = textAreaIncoming.getStyledDocument().getLength();
+            textAreaIncoming.getStyledDocument().insertString(textAreaIncoming.getStyledDocument().getLength(),
+                    message + "\n"  , default0 );
 
 
-            textAreaincoming.append("Я -> " + destinationAddress + ": "
-                    + message + "\n");
+            SimpleAttributeSet att = new SimpleAttributeSet();
+            StyleConstants.setItalic(att, true);
+            textAreaIncoming.setEditable(true);
+            for (int q = 0; q < kursive_array.toArray().length - 1; q += 2) {
+                textAreaIncoming.select(end + kursive_array.get(q), end+kursive_array.get(q+1) );
+                textAreaIncoming.replaceSelection("");
+                textAreaIncoming.getStyledDocument().insertString(end + kursive_array.get(q),
+                        message.substring(kursive_array.get(q), kursive_array.get(q+1) ), att);
+
+
+
+            }
+
+            att = new SimpleAttributeSet();
+            StyleConstants.setBold(att, true);
+            for (int i = 0; i < bold_array.toArray().length - 1; i += 2) {
+                textAreaIncoming.select(end + bold_array.get(i), end+bold_array.get(i+1) );
+                textAreaIncoming.replaceSelection("");
+                textAreaIncoming.getStyledDocument().insertString(end + bold_array.get(i),
+                        message.substring(bold_array.get(i), bold_array.get(i+1) ), att);
+
+
+
+            }
+            att = new SimpleAttributeSet();
+            StyleConstants.setUnderline(att, true);
+            for (int y = 0; y < under_array.toArray().length - 1; y += 2) {
+
+                textAreaIncoming.select((int)(end + under_array.get(y)), (int)(end+under_array.get(y+1)) );
+                textAreaIncoming.replaceSelection("");
+                textAreaIncoming.getStyledDocument().insertString((int)(end + under_array.get(y)),
+                        message.substring(under_array.get(y), under_array.get(y+1) ), att);
+
+
+
+            }
+
+            textAreaIncoming.setEditable(false);
+
+
 
 
 // Очищаем текстовую область ввода сообщения
-            textAreaOutgoing.setText("");
+
+            /*JTextPane a = new JTextPane();
+            SimpleAttributeSet att1 = new SimpleAttributeSet(); ;
+            StyleConstants.setItalic(att1, false);
+            StyleConstants.setBold(att1, false);
+
+            a.getStyledDocument().insertString(0,
+                    "", att1);
+            */
+
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -458,6 +549,7 @@ public class Main extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
 
         }
+
     }
 
     public static void main(String[] args) {
